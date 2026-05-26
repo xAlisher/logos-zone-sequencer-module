@@ -115,7 +115,8 @@ QString LogosZoneSequencerModule::publish_to(const QString& channelId,
         return QStringLiteral("Error: publish_to requires channelId and signingKeyHex");
     }
     qInfo() << "ZoneSequencer: publish_to channel" << channelId.left(16) + "...";
-    const char* checkpoint = checkpointPath.isEmpty() ? "" : checkpointPath.toUtf8().constData();
+    QByteArray cpBytes = checkpointPath.toUtf8();
+    const char* checkpoint = checkpointPath.isEmpty() ? "" : cpBytes.constData();
     char* result = zone_publish(
         m_nodeUrl.toUtf8().constData(),
         channelId.toUtf8().constData(),
