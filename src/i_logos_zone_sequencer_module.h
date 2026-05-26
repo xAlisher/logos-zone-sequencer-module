@@ -25,8 +25,8 @@ public:
     Q_INVOKABLE virtual void set_channel_id(const QString& channelIdHex) = 0;
     Q_INVOKABLE virtual QString get_channel_id() = 0;
     Q_INVOKABLE virtual QString publish(const QString& data) = 0;
-    // Stateless one-shot publish to any channel — bypasses the persistent handle.
-    // Use when the target channel differs from the primary channel (e.g. module sub-channels).
+    // Publish to any channel via a cached persistent handle — returns mantle_tx.hash directly.
+    // First call per channel creates the handle (blocks ~5s); subsequent calls are instant.
     Q_INVOKABLE virtual QString publish_to(const QString& channelId,
                                             const QString& signingKeyHex,
                                             const QString& checkpointPath,

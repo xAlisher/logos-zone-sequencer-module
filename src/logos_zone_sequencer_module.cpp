@@ -12,6 +12,10 @@ LogosZoneSequencerModule::~LogosZoneSequencerModule() {
         m_sequencerHandle = nullptr;
         qInfo() << "ZoneSequencer: sequencer destroyed";
     }
+    for (void* h : m_channelHandles.values()) {
+        zone_sequencer_destroy(h);
+    }
+    m_channelHandles.clear();
 }
 
 void LogosZoneSequencerModule::initLogos(LogosAPI* api) {
@@ -114,17 +118,29 @@ QString LogosZoneSequencerModule::publish_to(const QString& channelId,
     if (channelId.isEmpty() || signingKeyHex.isEmpty()) {
         return QStringLiteral("Error: publish_to requires channelId and signingKeyHex");
     }
-    qInfo() << "ZoneSequencer: publish_to channel" << channelId.left(16) + "...";
-    QByteArray cpBytes = checkpointPath.toUtf8();
-    const char* checkpoint = checkpointPath.isEmpty() ? "" : cpBytes.constData();
-    char* result = zone_publish(
-        m_nodeUrl.toUtf8().constData(),
-        channelId.toUtf8().constData(),
-        signingKeyHex.toUtf8().constData(),
-        data.toUtf8().constData(),
-        checkpoint);
+
+    // Get or create a persistent handle for this channel (cached after first use)
+    void* handle = m_channelHandles.value(channelId, nullptr);
+    if (!handle) {
+        qInfo() << "ZoneSequencer: publish_to creating handle for channel" << channelId.left(16) + "...";
+        QByteArray cpBytes = checkpointPath.toUtf8();
+        const char* checkpoint = checkpointPath.isEmpty() ? "" : cpBytes.constData();
+        handle = zone_sequencer_create(
+            m_nodeUrl.toUtf8().constData(),
+            channelId.toUtf8().constData(),
+            signingKeyHex.toUtf8().constData(),
+            checkpoint);
+        if (!handle) {
+            return QStringLiteral("Error: zone_sequencer_create returned null for channel");
+        }
+        m_channelHandles[channelId] = handle;
+        qInfo() << "ZoneSequencer: publish_to handle ready for channel" << channelId.left(16) + "...";
+    }
+
+    qInfo() << "ZoneSequencer: publish_to publishing via persistent handle";
+    char* result = zone_sequencer_publish(handle, data.toUtf8().constData());
     if (!result) {
-        return QStringLiteral("Error: zone_publish returned null");
+        return QStringLiteral("Error: zone_sequencer_publish returned null");
     }
     QString txHash = QString::fromUtf8(result);
     zone_free_string(result);

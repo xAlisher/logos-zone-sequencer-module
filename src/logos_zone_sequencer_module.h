@@ -2,6 +2,7 @@
 #include "i_logos_zone_sequencer_module.h"
 #include <QObject>
 #include <QString>
+#include <QMap>
 #include <QtConcurrent/QtConcurrentRun>
 
 class LogosAPI;
@@ -41,4 +42,5 @@ private:
     QString m_channelId;
     void*   m_sequencerHandle = nullptr;
     bool    m_creatingSequencer = false;
+    QMap<QString, void*> m_channelHandles;  // per-channel handles for publish_to
 };
