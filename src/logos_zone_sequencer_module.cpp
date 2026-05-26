@@ -107,6 +107,30 @@ QString LogosZoneSequencerModule::publish(const QString& data) {
     return txHash;
 }
 
+QString LogosZoneSequencerModule::publish_to(const QString& channelId,
+                                              const QString& signingKeyHex,
+                                              const QString& checkpointPath,
+                                              const QString& data) {
+    if (channelId.isEmpty() || signingKeyHex.isEmpty()) {
+        return QStringLiteral("Error: publish_to requires channelId and signingKeyHex");
+    }
+    qInfo() << "ZoneSequencer: publish_to channel" << channelId.left(16) + "...";
+    QByteArray cpBytes = checkpointPath.toUtf8();
+    const char* checkpoint = checkpointPath.isEmpty() ? "" : cpBytes.constData();
+    char* result = zone_publish(
+        m_nodeUrl.toUtf8().constData(),
+        channelId.toUtf8().constData(),
+        signingKeyHex.toUtf8().constData(),
+        data.toUtf8().constData(),
+        checkpoint);
+    if (!result) {
+        return QStringLiteral("Error: zone_publish returned null");
+    }
+    QString txHash = QString::fromUtf8(result);
+    zone_free_string(result);
+    return txHash;
+}
+
 QString LogosZoneSequencerModule::query_channel(const QString& channelId, int limit) {
     char* result = zone_query_channel(
         m_nodeUrl.toUtf8().constData(),

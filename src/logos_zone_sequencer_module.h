@@ -22,6 +22,10 @@ public:
     Q_INVOKABLE void set_channel_id(const QString& channelIdHex) override;
     Q_INVOKABLE QString get_channel_id() override;
     Q_INVOKABLE QString publish(const QString& data) override;
+    Q_INVOKABLE QString publish_to(const QString& channelId,
+                                   const QString& signingKeyHex,
+                                   const QString& checkpointPath,
+                                   const QString& data) override;
     Q_INVOKABLE QString query_channel(const QString& channelId, int limit) override;
     Q_INVOKABLE QString query_channel_paged(const QString& channelId,
                                              const QString& cursorJson,
