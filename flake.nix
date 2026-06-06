@@ -17,7 +17,7 @@
       url = "github:logos-co/logos-package/9e3730d5c0e3ec955761c05b50e3a6047ee4030b";
     };
     zone-sequencer-rs = {
-      url = "github:vpavlin/zone-sequencer-rs/31ee86a";
+      url = "github:xAlisher/zone-sequencer-rs/a6129b76e3a1a395276430b19bfdf17ad9eea25c";
       flake = false;
     };
   };
