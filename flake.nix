@@ -17,7 +17,7 @@
       url = "github:logos-co/logos-package/9e3730d5c0e3ec955761c05b50e3a6047ee4030b";
     };
     zone-sequencer-rs = {
-      url = "github:xAlisher/zone-sequencer-rs/a6129b76e3a1a395276430b19bfdf17ad9eea25c";
+      url = "github:xAlisher/zone-sequencer-rs/5d5c18413e62bf7fe42440ba935019aea68b21ee";
       flake = false;
     };
   };
@@ -51,7 +51,7 @@
               outputHashes = {
                 "jf-crhf-0.1.1" = "sha256-TUm91XROmUfqwFqkDmQEKyT9cOo1ZgAbuTDyEfe6ltg=";
                 "jf-poseidon2-0.1.0" = "sha256-QeCjgZXO7lFzF2Gzm2f8XI08djm5jyKI6D8U0jNTPB8=";
-                "logos-blockchain-blend-crypto-0.2.1" = "sha256-gZfVABdtKAMJ6JB3x1xs+qCU1ieo8GQ2Vs6UI6hU1LY=";
+                "logos-blockchain-blend-crypto-0.1.2" = "sha256-sfNJXdGgJ0nNl5jq8XLYiKFwTa+gJCwG8W9lVKtmjvQ=";
                 "overwatch-0.1.0" = "sha256-L7R1GdhRNNsymYe3RVyYLAmd6x1YY08TBJp4hG4/YwE=";
               };
             };
