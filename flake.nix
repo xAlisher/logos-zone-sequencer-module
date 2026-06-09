@@ -108,8 +108,8 @@
             '';
 
             postFixup = ''
-              patchelf --set-rpath "$out/lib:${logosLiblogos}/lib:${pkgs.lib.makeLibraryPath buildInputs}" \
-                $out/lib/liblogos_zone_sequencer_module.so
+              patchelf --set-rpath '$ORIGIN/.' $out/lib/liblogos_zone_sequencer_module.so
+              patchelf --set-rpath '$ORIGIN/.' $out/lib/libzone_sequencer_rs.so
             '';
 
             dontWrapQtApps = true;
@@ -123,7 +123,7 @@
             with open(sys.argv[2]) as f:
                 metadata = json.load(f)
 
-            built_variants = {'linux-x86_64-dev', 'linux-amd64-dev'}
+            built_variants = {'linux-x86_64', 'linux-amd64'}
 
             with tarfile.open(lgx_path, 'r:gz') as tar:
                 members = [(m, tar.extractfile(m).read() if m.isfile() else None) for m in tar.getmembers()]
@@ -136,7 +136,7 @@
                         if key in metadata:
                             manifest[key] = metadata[key]
                     if 'main' in manifest and isinstance(manifest['main'], dict):
-                        manifest["main"] = {k.replace("-dev", ""): v for k, v in manifest["main"].items() if k in built_variants}
+                        manifest["main"] = {k: v for k, v in manifest["main"].items() if k in built_variants}
                     data = json.dumps(manifest, indent=2).encode()
                     member.size = len(data)
                 patched.append((member, data))
@@ -151,16 +151,19 @@
           '';
 
           lgx = pkgs.runCommand "zone-sequencer.lgx" {
-            nativeBuildInputs = [ lgxTool pkgs.python3 ];
+            nativeBuildInputs = [ lgxTool pkgs.python3 pkgs.patchelf ];
           } ''
             lgx create zone-sequencer
 
             mkdir -p variant-files
             cp ${plugin}/lib/liblogos_zone_sequencer_module.so variant-files/
             cp ${plugin}/lib/libzone_sequencer_rs.so variant-files/
+            # Bundle openssl — linked by zone-sequencer-rs, not provided by AppImage runtime
+            cp ${pkgsRust.openssl.out}/lib/libssl.so.3 variant-files/
+            cp ${pkgsRust.openssl.out}/lib/libcrypto.so.3 variant-files/
 
-            lgx add zone-sequencer.lgx --variant linux-x86_64-dev --files ./variant-files --main liblogos_zone_sequencer_module.so -y
-            lgx add zone-sequencer.lgx --variant linux-amd64-dev --files ./variant-files --main liblogos_zone_sequencer_module.so -y
+            lgx add zone-sequencer.lgx --variant linux-amd64 --files ./variant-files --main liblogos_zone_sequencer_module.so -y
+            lgx add zone-sequencer.lgx --variant linux-x86_64 --files ./variant-files --main liblogos_zone_sequencer_module.so -y
 
             lgx verify zone-sequencer.lgx
 
