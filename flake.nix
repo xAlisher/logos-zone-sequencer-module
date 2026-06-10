@@ -123,7 +123,7 @@
             with open(sys.argv[2]) as f:
                 metadata = json.load(f)
 
-            built_variants = {'linux-x86_64-dev', 'linux-amd64-dev'}
+            built_variants = {'linux-amd64', 'linux-amd64-dev'}
 
             with tarfile.open(lgx_path, 'r:gz') as tar:
                 members = [(m, tar.extractfile(m).read() if m.isfile() else None) for m in tar.getmembers()]
@@ -136,7 +136,7 @@
                         if key in metadata:
                             manifest[key] = metadata[key]
                     if 'main' in manifest and isinstance(manifest['main'], dict):
-                        manifest["main"] = {k.replace("-dev", ""): v for k, v in manifest["main"].items() if k in built_variants}
+                        manifest["main"] = {k: v for k, v in manifest["main"].items() if k in built_variants}
                     data = json.dumps(manifest, indent=2).encode()
                     member.size = len(data)
                 patched.append((member, data))
@@ -159,12 +159,14 @@
             cp ${plugin}/lib/liblogos_zone_sequencer_module.so variant-files/
             cp ${plugin}/lib/libzone_sequencer_rs.so variant-files/
 
-            lgx add zone-sequencer.lgx --variant linux-x86_64-dev --files ./variant-files --main liblogos_zone_sequencer_module.so -y
+            # Add both portable (linux-amd64) and lgpm (linux-amd64-dev) variants.
+            # Basecamp loads the portable name; lgpm installs using the -dev name.
+            lgx add zone-sequencer.lgx --variant linux-amd64     --files ./variant-files --main liblogos_zone_sequencer_module.so -y
             lgx add zone-sequencer.lgx --variant linux-amd64-dev --files ./variant-files --main liblogos_zone_sequencer_module.so -y
 
-            lgx verify zone-sequencer.lgx
-
             ${patchManifest "zone-sequencer" "${self}/manifest.json"}
+
+            lgx verify zone-sequencer.lgx
 
             cp zone-sequencer.lgx $out
           '';
