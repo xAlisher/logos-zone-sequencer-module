@@ -14,7 +14,7 @@
       inputs.logos-cpp-sdk.follows = "logos-cpp-sdk";
     };
     logos-package = {
-      url = "github:logos-co/logos-package/9e3730d5c0e3ec955761c05b50e3a6047ee4030b";
+      url = "github:logos-co/logos-package/a2eec3694558d49fcc4abcbacb0b23c24380ade9";
     };
     zone-sequencer-rs = {
       url = "github:vpavlin/zone-sequencer-rs/31ee86a";
