@@ -7,8 +7,7 @@
   "category": "blockchain",
   "main": {
     "linux-x86_64-dev": "liblogos_zone_sequencer_module.so",
-    "linux-amd64-dev": "liblogos_zone_sequencer_module.so",
-    "linux-aarch64-dev": "liblogos_zone_sequencer_module.so"
+    "linux-amd64-dev": "liblogos_zone_sequencer_module.so"
   },
   "dependencies": [],
   "capabilities": []
