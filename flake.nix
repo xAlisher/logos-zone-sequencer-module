@@ -173,6 +173,7 @@
         in
         {
           inherit plugin rustLib lgx;
+          lgx-portable = lgx;
           default = lgx;
         }
       );
