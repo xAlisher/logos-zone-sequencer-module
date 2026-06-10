@@ -166,8 +166,7 @@
 
             ${patchManifest "zone-sequencer" "${self}/manifest.json"}
 
-            mkdir -p $out
-            cp zone-sequencer.lgx $out/zone-sequencer.lgx
+            cp zone-sequencer.lgx $out
           '';
 
         in
