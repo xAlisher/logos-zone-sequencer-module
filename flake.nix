@@ -19,7 +19,7 @@
     # v0.2 port: point at our v0.2 branch (logos-blockchain testnet 0.2.0).
     # See xAlisher/zone-sequencer-rs#5 / PR vpavlin/zone-sequencer-rs#2.
     zone-sequencer-rs = {
-      url = "github:xAlisher/zone-sequencer-rs/b460c2f";
+      url = "github:xAlisher/zone-sequencer-rs/4e97df4";
       flake = false;
     };
   };
@@ -43,17 +43,26 @@
             sha256 = "1xnhl4y2zpxvcgm0xx95v0v6av2amp5isfi0s92cxrjg7dqmp5z8";
           };
 
-          # ⚠️ v0.2 BUILD BLOCKER (logos-blockchain#3062): the v0.2 logos-blockchain
-          # rev carries a stray committed gitlink `.claude/worktrees/wf_...` with no
-          # .gitmodules entry, which breaks both cargo's submodule walk and Nix
-          # fetchgit. Until that one-line upstream fix lands:
-          #   - `${zone-sequencer-rs}/Cargo.lock` must be regenerated for v0.2 (the
-          #     v0.2 branch currently ships the v0.1.2 lock — `cargo generate-lockfile`
-          #     is itself gitlink-blocked), and
-          #   - the `outputHashes` below are v0.1.x hashes and need updating for the
-          #     v0.2 dep set.
-          # The Rust port itself is verified (compiles + 6/6 unit tests + live e2e
-          # inscription) via a local path-override; see the crate README.
+          # v0.2 added rust-rapidsnark (zk prover). Its build.rs DOWNLOADS a prebuilt
+          # C lib unless RAPIDSNARK_LIB_DIR is set — and the nix sandbox blocks network.
+          # Provide the pinned prebuilt PIC archive (sha from the rapidsnark repo's
+          # nix-hashes.json), mirroring that repo's own flake.
+          rapidsnarkLib = pkgs.fetchzip {
+            url = "https://github.com/logos-blockchain/logos-blockchain-rust-rapidsnark/releases/download/rapidsnark-pic-v0.0.8/rapidsnark-linux-x86_64-pic-v0.0.8.zip";
+            hash = "sha256-88+TkECQYCKBN0WbYLRB+qi6TEhbjVfrpCqlSgm0DR8=";
+          };
+
+          # v0.2 circuits crates (v0.5.3) also DOWNLOAD prebuilt artifacts at build time
+          # unless LBC_ROOT_DIR points at a local copy. Provide the pinned v0.5.3 artifact
+          # (root has lib/ poc/ pol/ poq/ prover/ signature/ verifier/ VERSION).
+          lbcRoot = builtins.fetchTarball {
+            url = "https://github.com/logos-blockchain/logos-blockchain-circuits/releases/download/v0.5.3/logos-blockchain-circuits-v0.5.3-linux-x86_64.tar.gz";
+            sha256 = "1mwy3g9dyjvlwykzs62gzf79rrnm20sy7c587nv26c1y9bm71wfv";
+          };
+
+          # v0.2: deps come from the cleaned fork xAlisher/logos-blockchain
+          # (logos-blockchain#3062 workaround). outputHashes below cover the
+          # v0.2 git dep set (regenerate if the lock changes).
           rustLib = pkgsRust.rustPlatform.buildRustPackage {
             pname = "zone-sequencer-rs";
             version = "0.2.0";
@@ -61,16 +70,63 @@
 
             cargoLock = {
               lockFile = "${zone-sequencer-rs}/Cargo.lock";
-              # TODO(v0.2): regenerate for the v0.2 dep set once #3062 unblocks lockgen.
               outputHashes = {
-                "jf-crhf-0.1.1" = "sha256-TUm91XROmUfqwFqkDmQEKyT9cOo1ZgAbuTDyEfe6ltg=";
-                "jf-poseidon2-0.1.0" = "sha256-QeCjgZXO7lFzF2Gzm2f8XI08djm5jyKI6D8U0jNTPB8=";
-                "logos-blockchain-blend-crypto-0.2.1" = "sha256-gZfVABdtKAMJ6JB3x1xs+qCU1ieo8GQ2Vs6UI6hU1LY=";
+                "jf-crhf-0.2.0" = "sha256-fF5gqFm7xYLubl2QzNilcZl3O0NZMFckChrr7kVudok=";
+                "jf-poseidon2-0.2.0" = "sha256-XeOEusSl7YkdE05emaDjH1SccutWZt/6ty5l/9ylxNM=";
+                "logos-blockchain-blend-crypto-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-blend-message-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-blend-proofs-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-chain-broadcast-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-chain-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-circuits-build-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-common-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-poc-sys-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-pol-sys-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-poq-sys-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-prover-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-circuits-signature-sys-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-circuits-types-0.5.3" = "sha256-kzf4l4UywcxMqQwQcACBQl1QZYT9Nl6gbpb5FaphFqo=";
+                "logos-blockchain-common-http-client-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-core-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-cryptarchia-engine-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-cryptarchia-sync-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-groth16-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-http-api-common-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-key-management-system-keys-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-key-management-system-macros-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-key-management-system-operators-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-key-management-system-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-ledger-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-libp2p-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-log-targets-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-log-targets-macros-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-mmr-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-network-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-poc-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-pol-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-poq-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-poseidon2-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-proofs-error-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-services-utils-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-storage-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-time-service-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-tracing-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-utils-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-utxotree-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-zksign-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
+                "logos-blockchain-zone-sdk-0.1.2" = "sha256-HthHmQBHnqJqb7qrD3fv97s5cSI1OwRQUPwEue4Twrg=";
                 "overwatch-0.1.0" = "sha256-L7R1GdhRNNsymYe3RVyYLAmd6x1YY08TBJp4hG4/YwE=";
+                "overwatch-derive-0.1.0" = "sha256-L7R1GdhRNNsymYe3RVyYLAmd6x1YY08TBJp4hG4/YwE=";
+                "rust-rapidsnark-0.1.3" = "sha256-A1wVkHRw3/xpV30JUgWxvfW5PgcyrxQxk7b4So5vXNs=";
+                "spongefish-0.2.0" = "sha256-prLkGrIavkaiVYKqSy+cLwl2Y1TkTp8vGl0HCeQdILc=";
               };
             };
 
             LOGOS_BLOCKCHAIN_CIRCUITS = circuits;
+            # Skip rust-rapidsnark's network download; link the pinned prebuilt libs.
+            RAPIDSNARK_LIB_DIR = "${rapidsnarkLib}/lib";
+            # Skip the circuits crates' network download; use the pinned v0.5.3 artifact.
+            LBC_ROOT_DIR = "${lbcRoot}";
 
             nativeBuildInputs = [ pkgsRust.pkg-config pkgsRust.perl ];
             buildInputs = [ pkgsRust.openssl ];

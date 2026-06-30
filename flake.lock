@@ -811,16 +811,16 @@
     "zone-sequencer-rs": {
       "flake": false,
       "locked": {
-        "lastModified": 1782821508,
-        "narHash": "sha256-zVQAtphSjY+hh3Vyc3YtwecLkT3EUnvNPaWXWLHMXhE=",
+        "lastModified": 1782849660,
+        "narHash": "sha256-gyEvbSH1c1tquvR14VxuImJ1DY9jMKeiXcQH08jmh1I=",
         "owner": "xAlisher",
         "repo": "zone-sequencer-rs",
-        "rev": "b460c2f085abbd7adbf7dcac573f7c8b27dec099",
+        "rev": "4e97df4edcb4c61c26ce229e3f95ace596f90088",
         "type": "github"
       },
       "original": {
         "owner": "xAlisher",
-        "ref": "b460c2f",
+        "ref": "4e97df4",
         "repo": "zone-sequencer-rs",
         "type": "github"
       }
