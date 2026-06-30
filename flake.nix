@@ -5,7 +5,8 @@
     logos-module-builder.url = "github:logos-co/logos-module-builder/0.2.0";
     nix-bundle-lgx.url = "github:logos-co/nix-bundle-lgx";
     # Our Rust FFI cdylib, built by its own flake (fork deps + rapidsnark/circuits).
-    zone-sequencer-rs.url = "path:../zone-sequencer-rs";
+    # Local git source during dev; switch to github:xAlisher/zone-sequencer-rs/<rev> for CI.
+    zone-sequencer-rs.url = "git+file:///home/alisher/work/seq-v2/zone-sequencer-rs?ref=feat/v0.2-port";
   };
 
   outputs = inputs@{ logos-module-builder, ... }:
