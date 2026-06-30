@@ -16,8 +16,10 @@
     logos-package = {
       url = "github:logos-co/logos-package/a2eec3694558d49fcc4abcbacb0b23c24380ade9";
     };
+    # v0.2 port: point at our v0.2 branch (logos-blockchain testnet 0.2.0).
+    # See xAlisher/zone-sequencer-rs#5 / PR vpavlin/zone-sequencer-rs#2.
     zone-sequencer-rs = {
-      url = "github:vpavlin/zone-sequencer-rs/31ee86a";
+      url = "github:xAlisher/zone-sequencer-rs/b460c2f";
       flake = false;
     };
   };
@@ -41,13 +43,25 @@
             sha256 = "1xnhl4y2zpxvcgm0xx95v0v6av2amp5isfi0s92cxrjg7dqmp5z8";
           };
 
+          # ⚠️ v0.2 BUILD BLOCKER (logos-blockchain#3062): the v0.2 logos-blockchain
+          # rev carries a stray committed gitlink `.claude/worktrees/wf_...` with no
+          # .gitmodules entry, which breaks both cargo's submodule walk and Nix
+          # fetchgit. Until that one-line upstream fix lands:
+          #   - `${zone-sequencer-rs}/Cargo.lock` must be regenerated for v0.2 (the
+          #     v0.2 branch currently ships the v0.1.2 lock — `cargo generate-lockfile`
+          #     is itself gitlink-blocked), and
+          #   - the `outputHashes` below are v0.1.x hashes and need updating for the
+          #     v0.2 dep set.
+          # The Rust port itself is verified (compiles + 6/6 unit tests + live e2e
+          # inscription) via a local path-override; see the crate README.
           rustLib = pkgsRust.rustPlatform.buildRustPackage {
             pname = "zone-sequencer-rs";
-            version = "0.1.0";
+            version = "0.2.0";
             src = zone-sequencer-rs;
 
             cargoLock = {
               lockFile = "${zone-sequencer-rs}/Cargo.lock";
+              # TODO(v0.2): regenerate for the v0.2 dep set once #3062 unblocks lockgen.
               outputHashes = {
                 "jf-crhf-0.1.1" = "sha256-TUm91XROmUfqwFqkDmQEKyT9cOo1ZgAbuTDyEfe6ltg=";
                 "jf-poseidon2-0.1.0" = "sha256-QeCjgZXO7lFzF2Gzm2f8XI08djm5jyKI6D8U0jNTPB8=";
