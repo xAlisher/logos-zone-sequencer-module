@@ -6,7 +6,7 @@
   "type": "core",
   "category": "blockchain",
   "interface": "universal",
-  "main": "zone_sequencer_impl",
+  "main": "zone_sequencer_plugin",
   "codegen": {
     "impl_header": "zone_sequencer_impl.h"
   },
