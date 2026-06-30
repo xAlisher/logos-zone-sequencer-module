@@ -1,17 +1,27 @@
 {
-  "name": "liblogos_zone_sequencer_module",
-  "version": "0.1.0",
-  "description": "Zone inscription module for logos-core via zone-sdk FFI",
-  "author": "jimmy-claw",
+  "name": "zone_sequencer",
+  "version": "0.2.0",
+  "description": "Zone inscription sequencer for logos-blockchain v0.2 (zone-sdk FFI). Universal module: consumers call modules().zone_sequencer.* — no getClient.",
+  "author": "xAlisher",
   "type": "core",
   "category": "blockchain",
-  "main": "liblogos_zone_sequencer_module",
+  "interface": "universal",
+  "main": "zone_sequencer_impl",
+  "codegen": {
+    "impl_header": "zone_sequencer_impl.h"
+  },
   "dependencies": [],
   "capabilities": [],
   "include": [
-    "liblogos_zone_sequencer_module.so",
-    "liblogos_zone_sequencer_module.dylib",
     "libzone_sequencer_rs.so",
     "libzone_sequencer_rs.dylib"
-  ]
+  ],
+  "nix": {
+    "external_libraries": [
+      { "name": "zone_sequencer_rs" }
+    ],
+    "cmake": {
+      "extra_include_dirs": ["src"]
+    }
+  }
 }
