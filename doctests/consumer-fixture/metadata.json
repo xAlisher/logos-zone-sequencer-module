@@ -1,0 +1,13 @@
+{
+  "name": "zone_seq_consumer_probe",
+  "version": "0.1.0",
+  "description": "Minimal C++ consumer proving modules().zone_sequencer.* works with no getClient (P4 demo).",
+  "author": "xAlisher",
+  "type": "core",
+  "category": "blockchain",
+  "interface": "universal",
+  "main": "zone_seq_consumer_probe_plugin",
+  "codegen": { "impl_header": "consumer_probe_impl.h" },
+  "dependencies": ["zone_sequencer"],
+  "capabilities": []
+}

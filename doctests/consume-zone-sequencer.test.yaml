@@ -1,0 +1,56 @@
+name: "Headless: zone_seq_consumer_probe consumes zone_sequencer via modules() (no getClient)"
+output: consume-zone-sequencer.md
+project_name: zone-seq-consumer-probe
+release: ""
+intro: |
+  Proves headlessly under `logoscore` that the modernized `zone_sequencer` module
+  (LogosModuleContext + logos_events) is consumable through the generated
+  `modules().zone_sequencer` typed wrapper with **zero hand-written getClient** —
+  the tutorial's calc_aggregator pattern applied to our module. Also exercises the
+  type:core -> type:core consume path (dlipicar's open question).
+
+sections:
+  - title: "Build the runtime + package manager"
+    step: true
+    steps:
+      - run: "nix build 'github:logos-co/logos-logoscore-cli' --out-link ./logos"
+      - run: "nix build 'github:logos-co/logos-package-manager#cli' --out-link ./pm"
+      - run: "mkdir -p modules"
+
+  - title: "Build + install both modules"
+    step: true
+    steps:
+      - title: "zone_sequencer (the provider / dependency)"
+        run: "nix build 'git+file:///home/alisher/basecamp/modules/logos-zone-sequencer-module?ref=feat/modernize-modules-context#lgx' --out-link result-zs-lgx && ./pm/bin/lgpm --modules-dir ./modules install --file result-zs-lgx/*.lgx"
+      - title: "zone_seq_consumer_probe (the consumer)"
+        run: "nix build 'git+file:///home/alisher/basecamp/modules/logos-zone-sequencer-module?ref=feat/modernize-modules-context&dir=doctests/consumer-fixture#lgx' --out-link result-probe-lgx && ./pm/bin/lgpm --modules-dir ./modules install --file result-probe-lgx/*.lgx"
+
+  - title: "Run under logoscore + assert the typed cross-module call"
+    step: true
+    steps:
+      - run: "mkdir -p zsdata"
+      - run: "./logos/bin/logoscore -D -m ./modules --persistence-path ./zsdata &"
+      - run: "sleep 5"
+      - run: "./logos/bin/logoscore load-module zone_sequencer"
+      - run: "./logos/bin/logoscore load-module zone_seq_consumer_probe"
+      - title: "DIAG: echo_arg (string in/out, no FFI) — isolates dispatch"
+        run: "./logos/bin/logoscore call zone_sequencer echo_arg hello123"
+        expect_contains:
+          - "echo:hello123"
+      - title: "FINDING: FFI methods need the GUI runtime, not bare logoscore"
+        text: |
+          zone_sequencer.derive_channel_id / publish call the Rust FFI (libzone_sequencer_rs).
+          Under **bare logoscore** the FFI call returns a default-failed result (logoscore
+          swallows the module's stderr) — the same GUI-vs-logoscore runtime gap discussed in
+          the "Headless Logos Core" thread. echo_arg (no FFI, above) proves dispatch + string
+          args work; the FFI path is validated under GUI Basecamp + directly (live inscription
+          against the node). So the modernization is sound; the FFI-under-logoscore gap is separate.
+      - title: "consumer -> modules().zone_sequencer.echo_arg (FFI-free cross-module proof)"
+        text: |
+          probe_echo forwards through the generated modules().zone_sequencer typed wrapper —
+          proving the type:core -> type:core cross-module round-trip works headlessly, with
+          ZERO hand-written getClient.
+        run: "./logos/bin/logoscore call zone_seq_consumer_probe probe_echo roundtrip42"
+        expect_contains:
+          - "echo:roundtrip42"
+      - run: "./logos/bin/logoscore stop"
