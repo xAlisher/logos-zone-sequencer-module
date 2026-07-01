@@ -37,6 +37,9 @@ public:
     /// Derive the 64-hex channel id from the configured signing key (no node).
     StdLogosResult get_channel_id();
 
+    /// Diagnostic: echo a string arg (no FFI) to isolate dispatch from the Rust FFI.
+    StdLogosResult echo_arg(const std::string& s);
+
     /// Stateless derive: 64-hex channel id from the given key in one call (no node,
     /// no prior config). Robust under logoscore's per-call instance model.
     StdLogosResult derive_channel_id(const std::string& signingKeyHex);
