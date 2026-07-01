@@ -24,5 +24,8 @@ public:
     QString ping() override;
 
 protected:
-    void onContextReady() override { setReady(true); }
+    // Self-test: once modules() is wired, auto-forward to zone_sequencer and
+    // write the result to a file — verifies the ui_qml→modules() RUNTIME path in
+    // Basecamp without a QML round-trip (QML console is dropped from the log).
+    void onContextReady() override;
 };
