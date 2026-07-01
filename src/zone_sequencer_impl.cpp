@@ -101,6 +101,9 @@ StdLogosResult ZoneSequencerImpl::publish(const std::string& data) {
         return {false, {}, m_creating ? "sequencer still initializing, try again shortly"
                                       : "sequencer not initialized (set node_url + signing_key + channel_id)"};
     }
+    // Serialize: the sequencer handle is not concurrent-publish safe (overlapping
+    // calls segfault). Sequential publishes are the intended use.
+    std::lock_guard<std::mutex> pub(m_publishMtx);
     OwnedCStr r(zone_sequencer_publish(handle, data.c_str()));
     if (!r.ok()) return {false, {}, "zone_sequencer_publish returned null"};
     const std::string txHash = r.str();

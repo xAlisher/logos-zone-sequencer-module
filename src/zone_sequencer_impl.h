@@ -82,4 +82,8 @@ private:
     std::mutex  m_mtx;
     void*       m_sequencerHandle = nullptr;
     std::atomic<bool> m_creating{false};
+    // Serializes calls into zone_sequencer_publish: the Rust sequencer handle is
+    // not safe for concurrent publish, and overlapping calls segfault. Beacon
+    // serializes via pollBusy, but guard here so any consumer is safe.
+    std::mutex  m_publishMtx;
 };
