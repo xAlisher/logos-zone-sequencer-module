@@ -1,0 +1,19 @@
+// QtRO contract for the zone_seq_ui_probe backend. PROPs auto-sync to every QML
+// replica; SLOTs are callable from QML via logos.watch(...) and directly from
+// the headless logoscore load test. Mirrors shop-basecamp's authoring model.
+class ZoneSeqUiProbe
+{
+    PROP(QString status="Ready" READONLY)
+    PROP(bool ready=false READONLY)
+
+    // Forwards to modules().zone_sequencer.derive_channel_id — the core proof
+    // that a Qt/UI backend can call a universal core module via modules(),
+    // with no hand-written getClient.
+    SLOT(QString deriveChannelId(QString signingKeyHex))
+
+    // FFI-free cross-module round-trip via modules().zone_sequencer.echo_arg.
+    SLOT(QString echoArg(QString s))
+
+    // Health probe for the headless load test; reports modules() readiness.
+    SLOT(QString ping())
+}

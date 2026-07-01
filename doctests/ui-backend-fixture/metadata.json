@@ -1,0 +1,14 @@
+{
+  "name": "zone_seq_ui_probe",
+  "version": "0.1.0",
+  "description": "Minimal ui_qml backend that forwards to modules().zone_sequencer.* from a LogosUiPluginContext (QtRO) backend. Proves the (never-tested) shop pattern headlessly — beacon's v2 template.",
+  "author": "xAlisher",
+  "type": "ui_qml",
+  "interface": "universal",
+  "category": "blockchain",
+  "main": "zone_seq_ui_probe_plugin",
+  "view": "qml/Main.qml",
+  "dependencies": ["zone_sequencer"],
+  "codegen": { "rep": "src/probe.rep" },
+  "capabilities": []
+}
