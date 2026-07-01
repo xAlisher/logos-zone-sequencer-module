@@ -64,18 +64,10 @@ StdLogosResult ZoneSequencerImpl::echo_arg(const std::string& s) {
 }
 
 StdLogosResult ZoneSequencerImpl::derive_channel_id(const std::string& signingKeyHex) {
-    // DIAG: file markers bypass logoscore's swallowed stderr (basecamp#163).
-    auto mark = [](const char* m){ FILE* f=fopen("/tmp/zs-debug.log","a"); if(f){fprintf(f,"%s\n",m);fflush(f);fclose(f);} };
-    mark("enter derive_channel_id");
-    if (signingKeyHex.empty()) { mark("empty key"); return {false, {}, "empty signing key"}; }
-    mark("before FFI zone_derive_channel_id");
-    char* raw = zone_derive_channel_id(signingKeyHex.c_str());
-    mark(raw ? "after FFI: non-null" : "after FFI: NULL");
-    if (!raw) return {false, {}, "zone_derive_channel_id returned null"};
-    std::string ch(raw);
-    zone_free_string(raw);
-    mark("returning success");
-    return {true, ch};
+    if (signingKeyHex.empty()) return {false, {}, "empty signing key"};
+    OwnedCStr r(zone_derive_channel_id(signingKeyHex.c_str()));
+    if (!r.ok()) return {false, {}, "zone_derive_channel_id returned null"};
+    return {true, r.str()};
 }
 
 void ZoneSequencerImpl::tryCreateSequencer() {

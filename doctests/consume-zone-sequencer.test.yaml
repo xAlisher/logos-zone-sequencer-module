@@ -37,20 +37,22 @@ sections:
         run: "./logos/bin/logoscore call zone_sequencer echo_arg hello123"
         expect_contains:
           - "echo:hello123"
-      - title: "FINDING: FFI methods need the GUI runtime, not bare logoscore"
+      - title: "DIRECT: zone_sequencer.derive_channel_id — the Rust FFI path, under logoscore"
         text: |
-          zone_sequencer.derive_channel_id / publish call the Rust FFI (libzone_sequencer_rs).
-          Under **bare logoscore** the FFI call returns a default-failed result (logoscore
-          swallows the module's stderr) — the same GUI-vs-logoscore runtime gap discussed in
-          the "Headless Logos Core" thread. echo_arg (no FFI, above) proves dispatch + string
-          args work; the FFI path is validated under GUI Basecamp + directly (live inscription
-          against the node). So the modernization is sound; the FFI-under-logoscore gap is separate.
-      - title: "consumer -> modules().zone_sequencer.echo_arg (FFI-free cross-module proof)"
-        text: |
-          probe_echo forwards through the generated modules().zone_sequencer typed wrapper —
-          proving the type:core -> type:core cross-module round-trip works headlessly, with
-          ZERO hand-written getClient.
-        run: "./logos/bin/logoscore call zone_seq_consumer_probe probe_echo roundtrip42"
+          Calls the Rust FFI (libzone_sequencer_rs) headlessly. NOTE: use a key that
+          contains a–f letters — the logoscore CLI coerces an all-DECIMAL positional arg
+          to a number, so a pure-digit key never reaches the std::string param (a CLI
+          arg-typing quirk, not a module bug; QML/IPC pass typed strings correctly).
+          Key = 64×'a' derives to a fixed channel id.
+        run: "./logos/bin/logoscore call zone_sequencer derive_channel_id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         expect_contains:
-          - "echo:roundtrip42"
+          - "e734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306df2f01b5636b58"
+      - title: "consumer -> modules().zone_sequencer.derive_channel_id (cross-module + FFI)"
+        text: |
+          probe_channel_id forwards through the generated modules().zone_sequencer typed
+          wrapper into the Rust FFI — proving the full type:core -> type:core round-trip
+          (typed IPC + FFI) works headlessly, with ZERO hand-written getClient.
+        run: "./logos/bin/logoscore call zone_seq_consumer_probe probe_channel_id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        expect_contains:
+          - "e734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306df2f01b5636b58"
       - run: "./logos/bin/logoscore stop"
