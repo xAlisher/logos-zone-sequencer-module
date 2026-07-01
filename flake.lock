@@ -20812,16 +20812,16 @@
       "locked": {
         "lastModified": 1782853181,
         "narHash": "sha256-hfJYqp0b4FQQHVReq5XWFBZjnzKtrRzdsmsXi3llxbI=",
-        "ref": "feat/v0.2-port",
+        "owner": "xAlisher",
+        "repo": "zone-sequencer-rs",
         "rev": "73307b92cd1a0cdb5f049efa2ed186341149a718",
-        "revCount": 27,
-        "type": "git",
-        "url": "file:///home/alisher/work/seq-v2/zone-sequencer-rs"
+        "type": "github"
       },
       "original": {
+        "owner": "xAlisher",
         "ref": "feat/v0.2-port",
-        "type": "git",
-        "url": "file:///home/alisher/work/seq-v2/zone-sequencer-rs"
+        "repo": "zone-sequencer-rs",
+        "type": "github"
       }
     }
   },
