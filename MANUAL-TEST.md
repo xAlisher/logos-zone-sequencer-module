@@ -20,7 +20,7 @@ Keeper→Beacon→ia chain.
 ## 1. Build the .lgx
 ```sh
 cd ~/basecamp/modules/logos-zone-sequencer-module
-nix build .#lgx-portable -o result-lgx
+nix build .#lgx -o result-lgx        # .#lgx has the linux-amd64-dev variant lgpm installs
 ls -L result-lgx/*.lgx          # → logos-zone_sequencer-module-lib.lgx
 ```
 
