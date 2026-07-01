@@ -65,9 +65,13 @@ StdLogosResult ZoneSequencerImpl::echo_arg(const std::string& s) {
 
 StdLogosResult ZoneSequencerImpl::derive_channel_id(const std::string& signingKeyHex) {
     if (signingKeyHex.empty()) return {false, {}, "empty signing key"};
-    OwnedCStr r(zone_derive_channel_id(signingKeyHex.c_str()));
-    if (!r.ok()) return {false, {}, "zone_derive_channel_id returned null"};
-    return {true, r.str()};
+    try {
+        OwnedCStr r(zone_derive_channel_id(signingKeyHex.c_str()));
+        if (!r.ok()) return {false, {}, "zone_derive_channel_id returned null"};
+        return {true, r.str()};
+    } catch (const std::exception& e) {
+        return {false, {}, std::string("FFI threw: ") + e.what()};
+    }
 }
 
 void ZoneSequencerImpl::tryCreateSequencer() {
