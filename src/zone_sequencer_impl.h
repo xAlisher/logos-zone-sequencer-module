@@ -37,6 +37,10 @@ public:
     /// Derive the 64-hex channel id from the configured signing key (no node).
     StdLogosResult get_channel_id();
 
+    /// Stateless derive: 64-hex channel id from the given key in one call (no node,
+    /// no prior config). Robust under logoscore's per-call instance model.
+    StdLogosResult derive_channel_id(const std::string& signingKeyHex);
+
     // ── publish ──────────────────────────────────────────────────────────────
     /// Publish via the persistent sequencer. Emits `publishResult` on success.
     StdLogosResult publish(const std::string& data);

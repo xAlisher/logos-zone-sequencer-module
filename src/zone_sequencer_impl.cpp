@@ -59,6 +59,13 @@ StdLogosResult ZoneSequencerImpl::get_channel_id() {
     return {true, r.str()};
 }
 
+StdLogosResult ZoneSequencerImpl::derive_channel_id(const std::string& signingKeyHex) {
+    if (signingKeyHex.empty()) return {false, {}, "empty signing key"};
+    OwnedCStr r(zone_derive_channel_id(signingKeyHex.c_str()));
+    if (!r.ok()) return {false, {}, "zone_derive_channel_id returned null"};
+    return {true, r.str()};
+}
+
 void ZoneSequencerImpl::tryCreateSequencer() {
     {
         std::lock_guard<std::mutex> lk(m_mtx);
