@@ -20810,11 +20810,11 @@
         "nixpkgs-rust": "nixpkgs-rust"
       },
       "locked": {
-        "lastModified": 1782876536,
-        "narHash": "sha256-emPeC3u+Y+wwCS+qEXrhBrDXqiwHhWvBbrJteZqEZRU=",
+        "lastModified": 1783118514,
+        "narHash": "sha256-zH+aILtRUVyjhYin2eXV6ZzEh7qayxepTk+xT4w9GZY=",
         "owner": "xAlisher",
         "repo": "zone-sequencer-rs",
-        "rev": "bdd9f887d86c176273a82d932082761d11dfd486",
+        "rev": "f6f1dcd982470b6013e0ea3250b2689287e58e59",
         "type": "github"
       },
       "original": {
